@@ -15,11 +15,11 @@ const url = "https://www.youtube.com/embed/"
                     <button type="button" class="btn-close float-end" data-bs-dismiss="modal" aria-label="Close">
                     </button>
                     <div class="row my-2 justify-content-center align-items-center">
-                        <div class="col-6">
-                            <iframe width="96%" height="200px" :src="url + id">
+                        <div class="col-12 col-sm-6">
+                            <iframe :src="url + id">
                             </iframe>
                         </div>
-                        <div class="col-5 m-1 pt-auto">
+                        <div class="col-11 col-sm-5 m-1 pt-auto">
                             <h5>{{ title }}</h5>
                             <p class="description">{{ description }}</p>
                             <!-- <p class="text-truncate">{{description}}</p> -->
@@ -43,6 +43,8 @@ const url = "https://www.youtube.com/embed/"
 }
 
 iframe {
+    width:100%; 
+    height: 200px;
     max-width: 100%;
     /* height: auto; */
 }

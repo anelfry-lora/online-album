@@ -6,7 +6,7 @@ import { collection, onSnapshot, addDoc, doc, deleteDoc } from "firebase/firesto
 import { db } from '@/firebase'
 
 const searchVideo = ref('')
-const video = ref(null)
+const video = ref('')
 const uid = ref('')
 const id = ref('')
 const title = ref('')
@@ -35,29 +35,32 @@ onMounted(async () => {
 })
 
 const add = (url) => {
-    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-    const match = url.match(regExp);
-    const videoId = (match && match[7].length === 11) ? match[7] : false;
-    fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=AIzaSyA5KkFSnkBYaS1ES3ObFy4nQUyIDMPhZSc&part=snippet,contentDetails,statistics,status`)
-        .then(resp => resp.json())
-        .then(response => {
-            // listVideos.value
-            if (listVideos.value.find(obj => obj.uid === response.items[0].id)) {
-                alert('Este video ya esta en la lista.')
-            } else {
-                addDoc(collection(db, "videos"), {
-                    uid: response.items[0].id,
-                    title: response.items[0].snippet.localized.title,
-                    description: response.items[0].snippet.localized.description,
-                    url: url,
-                    img: response.items[0].snippet.thumbnails.standard.url,
-                    duration: response.items[0].contentDetails.duration.replace("PT", "").replace("H", ":").replace("M", ":").replace("S", ""),
-                });
-                video.value = ''
-            }
-        })
-        .catch(err => console.error(err));
-
+    if (isUrl(url)) {
+        const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+        const match = url.match(regExp);
+        const videoId = (match && match[7].length === 11) ? match[7] : false;
+        fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=AIzaSyA5KkFSnkBYaS1ES3ObFy4nQUyIDMPhZSc&part=snippet,contentDetails,statistics,status`)
+            .then(resp => resp.json())
+            .then(response => {
+                // listVideos.value
+                if (listVideos.value.find(obj => obj.uid === response.items[0].id)) {
+                    alert('Este video ya esta en la lista.')
+                } else {
+                    addDoc(collection(db, "videos"), {
+                        uid: response.items[0].id,
+                        title: response.items[0].snippet.localized.title,
+                        description: response.items[0].snippet.localized.description,
+                        url: url,
+                        img: response.items[0].snippet.thumbnails.standard.url,
+                        duration: response.items[0].contentDetails.duration.replace("PT", "").replace("H", ":").replace("M", ":").replace("S", ""),
+                    });
+                    video.value = ''
+                }
+            })
+            .catch(err => console.error(err));
+    } else {
+        alert('Es necesario una URL')
+    }
 }
 
 const deleted = () => {
@@ -69,6 +72,8 @@ const details = () => {
     detailsVideo = listVideos.value.filter(item => item.uid === uid.value)
 }
 
+const isUrl = url => url.includes('http') || url.includes('https')
+
 </script>
 
 <template>
@@ -79,7 +84,7 @@ const details = () => {
                 <input v-model="video" @keyup.enter="add(video)" class="form-control" placeholder="Añadir..." autofocus
                     aria-label="URL de un video" aria-describedby="button-addon2">
                 <button class="btn btn-primary gap-2 col-4 col-sm-2 mx-auto" type="button" id="button-addon"
-                    :disabled="!video" @click="add(video)">Añadir</button>
+                    :disabled="!isUrl(video)" @click="add(video)">Añadir</button>
             </div>
             <div>
                 <div class="row">
