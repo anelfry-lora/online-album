@@ -34,12 +34,15 @@ onMounted(async () => {
     })
 })
 
+const extractId = ( url ) => {
+    const match = url.match(/^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/)
+    const videoId = (match && match[7].length === 11) ? match[7] : false
+    return videoId
+}
+
 const add = (url) => {
     if (isUrl(url)) {
-        const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
-        const match = url.match(regExp);
-        const videoId = (match && match[7].length === 11) ? match[7] : false;
-        fetch(`https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=AIzaSyA5KkFSnkBYaS1ES3ObFy4nQUyIDMPhZSc&part=snippet,contentDetails,statistics,status`)
+        fetch(`https://www.googleapis.com/youtube/v3/videos?id=${extractId(url)}&key=AIzaSyA5KkFSnkBYaS1ES3ObFy4nQUyIDMPhZSc&part=snippet,contentDetails,statistics,status`)
             .then(resp => resp.json())
             .then(response => {
                 // listVideos.value
@@ -63,14 +66,9 @@ const add = (url) => {
     }
 }
 
-const deleted = () => {
-    // listVideos.value = listVideos.value.filter(item => item.id !== id.value)
-    deleteDoc(doc(collection(db, "videos"), id.value))
-}
+const deleted = () => deleteDoc(doc(collection(db, "videos"), id.value))
 
-const details = () => {
-    detailsVideo = listVideos.value.filter(item => item.uid === uid.value)
-}
+const details = () => detailsVideo = listVideos.value.filter(item => item.uid === uid.value)
 
 const isUrl = url => url.includes('http') || url.includes('https')
 
